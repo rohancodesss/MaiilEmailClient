@@ -100,7 +100,8 @@ const state = {
   query: "",
   composeOpen: false,
   settingsOpen: false,
-  sidebarOpen: false
+  sidebarOpen: false,
+  theme: localStorage.getItem("byob-theme") || "light"
 };
 
 const icons = {
@@ -111,15 +112,18 @@ const icons = {
   inbox: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16l2 10v6H2v-6z"/><path d="M2 14h6l2 3h4l2-3h6"/></svg>',
   mail: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="m4 7 8 6 8-6"/></svg>',
   menu: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h16"/></svg>',
+  moon: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21 14.8A8.5 8.5 0 0 1 9.2 3a7 7 0 1 0 11.8 11.8z"/></svg>',
   plus: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg>',
   search: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 4 4"/></svg>',
   send: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m22 2-7 20-4-9-9-4z"/><path d="M22 2 11 13"/></svg>',
   settings: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a8 8 0 0 0 .1-2l2-1.5-2-3.5-2.4 1a8 8 0 0 0-1.7-1L15 5.4h-4L10.6 8a8 8 0 0 0-1.7 1L6.5 8l-2 3.5 2 1.5a8 8 0 0 0 .1 2l-2.1 1.5 2 3.5 2.4-1a8 8 0 0 0 1.7 1l.4 2.6h4l.4-2.6a8 8 0 0 0 1.7-1l2.4 1 2-3.5z"/></svg>',
   star: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1 6.2-5.5-2.9-5.5 2.9 1-6.2L3 9.6l6.2-.9z"/></svg>',
+  sun: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.9 4.9 1.4 1.4"/><path d="m17.7 17.7 1.4 1.4"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.3 17.7-1.4 1.4"/><path d="m19.1 4.9-1.4 1.4"/></svg>',
   trash: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 16h10l1-16"/></svg>'
 };
 
 function render() {
+  applyTheme();
   const app = document.querySelector("#app");
   const visibleMessages = getVisibleMessages();
   const selected = getSelectedMessage(visibleMessages);
@@ -195,6 +199,7 @@ function renderSidebar() {
 }
 
 function renderTopbar() {
+  const isDark = state.theme === "dark";
   return `
     <header class="topbar">
       <button class="icon-button mobile-menu" data-action="menu" aria-label="Open folders">${icons.menu}</button>
@@ -202,9 +207,15 @@ function renderTopbar() {
         ${icons.search}
         <input type="search" placeholder="Search mail" value="${escapeHtml(state.query)}" data-search />
       </label>
-      <div class="account-chip">
-        <span class="presence"></span>
-        <span>alex@byobmail.dev</span>
+      <div class="topbar-actions">
+        <button class="theme-toggle" data-action="theme" aria-label="Switch to ${isDark ? "light" : "dark"} mode" aria-pressed="${isDark}">
+          ${isDark ? icons.sun : icons.moon}
+          <span>${isDark ? "Light" : "Dark"}</span>
+        </button>
+        <div class="account-chip">
+          <span class="presence"></span>
+          <span>alex@byobmail.dev</span>
+        </div>
       </div>
     </header>
   `;
@@ -404,6 +415,7 @@ function handleAction(action) {
   if (action === "compose") state.composeOpen = true;
   if (action === "settings") state.settingsOpen = true;
   if (action === "menu") state.sidebarOpen = !state.sidebarOpen;
+  if (action === "theme") toggleTheme();
   if (action === "close-compose") state.composeOpen = false;
   if (action === "close-settings") state.settingsOpen = false;
 
@@ -417,6 +429,15 @@ function handleAction(action) {
   }
 
   render();
+}
+
+function toggleTheme() {
+  state.theme = state.theme === "dark" ? "light" : "dark";
+  localStorage.setItem("byob-theme", state.theme);
+}
+
+function applyTheme() {
+  document.body.dataset.theme = state.theme;
 }
 
 function getFolderLabel() {
