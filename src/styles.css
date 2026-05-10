@@ -51,6 +51,13 @@ select {
   font: inherit;
 }
 
+input,
+textarea,
+select {
+  background: var(--panel);
+  color: var(--text);
+}
+
 button {
   cursor: pointer;
 }

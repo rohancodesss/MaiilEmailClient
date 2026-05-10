@@ -434,10 +434,40 @@ function handleAction(action) {
 function toggleTheme() {
   state.theme = state.theme === "dark" ? "light" : "dark";
   localStorage.setItem("byob-theme", state.theme);
+  savePreferences({ theme: state.theme });
 }
 
 function applyTheme() {
   document.body.dataset.theme = state.theme;
+}
+
+async function loadPreferences() {
+  try {
+    const response = await fetch("/api/preferences");
+    if (!response.ok) return;
+    const preferences = await response.json();
+    if (preferences.theme === "dark" || preferences.theme === "light") {
+      state.theme = preferences.theme;
+      localStorage.setItem("byob-theme", state.theme);
+      render();
+    }
+  } catch {
+    applyTheme();
+  }
+}
+
+async function savePreferences(preferences) {
+  try {
+    await fetch("/api/preferences", {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(preferences)
+    });
+  } catch {
+    localStorage.setItem("byob-theme", preferences.theme);
+  }
 }
 
 function getFolderLabel() {
@@ -454,3 +484,4 @@ function escapeHtml(value) {
 }
 
 render();
+loadPreferences();
