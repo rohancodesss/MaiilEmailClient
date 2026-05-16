@@ -5,41 +5,62 @@ BYOB Mail is a clean, near-stock email client interface for users who bring thei
 ## Features
 
 - Three-pane mail layout with folders, message list, and reading pane
-- Compose drawer with realistic address, subject, and body fields
-- Search, folder filtering, starred messages, archive, delete, and unread toggles
-- Account settings surface for IMAP, SMTP, and API endpoint details
-- Dark mode toggle backed by a local preferences API
+- Compose drawer and reply flow with persistence via REST adapter
+- Search (debounced), folder filtering, starred messages, archive, delete, and unread toggles
+- Account settings saved to the preferences API (endpoints only — no credentials in the browser)
+- Dark mode with flash-free loading and server-backed preferences
+- Keyboard shortcuts: `/` search, `c` compose, `j` / `k` next/previous message
+- Accessible modals (Escape to close, focus trap, focus restore)
 - Responsive layout that collapses gracefully on small screens
-- Mock data isolated in `src/app.js` for easy replacement
+- Pluggable mail adapter in `src/adapter.js`
 
 ## Run Locally
-
-Run the local server:
 
 ```bash
 npm start
 ```
 
+Development with auto-reload:
+
+```bash
+npm run dev
+```
+
 Then visit `http://127.0.0.1:5173`.
 
-The server is dependency-free and provides:
+## API
 
-- `GET /api/preferences`
-- `PUT /api/preferences`
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/health` | Health check |
+| GET/PUT | `/api/preferences` | Theme and account settings (PUT merges) |
+| GET/PUT | `/api/messages` | Message list persistence |
+
+## Project Layout
+
+```
+src/
+  app.js          Boot, events, keyboard shortcuts
+  adapter.js      REST mail adapter (swap for IMAP/JMAP/etc.)
+  render.js       UI templates
+  mail-logic.js   Filtering and selection helpers
+lib/              Shared logic used by server and tests
+server.js         Static file server and API
+test/             node:test unit tests
+```
 
 ## Bring Your Own Backend
 
-This project does not send or receive real email yet. The UI is designed around a simple adapter boundary:
+Replace `createRestMailAdapter()` in `src/app.js` with your own implementation of:
 
-- Replace the `messages` array in `src/app.js` with data from your backend.
-- Wire folder actions to IMAP, JMAP, Graph, Gmail API, or your own API.
-- Connect the compose submit handler to your SMTP or send endpoint.
-- Store credentials outside the browser in a backend service.
-- Keep user preferences in the backend by extending `server.js` or replacing it with your app service.
+- `listMessages`, `saveMessages`, `updateMessage`, `moveMessage`, `sendMessage`
+- `getPreferences`, `savePreferences`
 
-## Suggested Next Steps
+Store credentials in your backend service, not in this UI.
 
-- Add authentication and account persistence
-- Create a backend adapter module
-- Add message threading and attachment previews
-- Add tests around filtering and message actions
+## Scripts
+
+- `npm start` — run the server
+- `npm run dev` — run with `--watch`
+- `npm run check` — syntax-check JS
+- `npm test` — run unit tests

@@ -16,7 +16,7 @@
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-body[data-theme="dark"] {
+html[data-theme="dark"] {
   color-scheme: dark;
   --bg: #111418;
   --panel: #171b21;
@@ -399,6 +399,29 @@ svg {
 
 .message-row strong {
   font-size: 14px;
+}
+
+.message-meta-icons {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.message-meta-icons time {
+  color: var(--quiet);
+  font-size: 12px;
+}
+
+.card-star {
+  display: inline-grid;
+  place-items: center;
+  color: #b58105;
+}
+
+.card-star svg {
+  width: 14px;
+  height: 14px;
 }
 
 .message-row time {
